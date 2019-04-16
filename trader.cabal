@@ -1,0 +1,241 @@
+cabal-version:       2.4
+name:                trader
+version:             0.1.0.0
+synopsis:            A simple trading bot
+description:         Money maker
+license:             MIT
+license-file:        LICENSE
+author:              Vasiliy Yorkin
+maintainer:          vasiliy.yorkin@gmail.com
+copyright:           2019 (c) Vasiliy Yorkin aka vyorkin
+category:            Language
+build-type:          Simple
+extra-source-files:  CHANGELOG.md
+
+common main
+  build-depends:       base
+                     , relude ^>= 0.4
+                     , co-log ^>= 0.2
+                     , text ^>= 1.2
+                     , bytestring ^>= 0.10
+                     , base16-bytestring ^>= 0.1
+                     -- we're using the older time package because:
+                     -- optparse-applicative -> process -> unix -> time (>=1.2 && <1.9)
+                     , time ^>= 1.8 && < 1.9
+                     , lens ^>= 4.17
+                     , containers ^>= 0.6
+                     , stm ^>= 2.5
+                     , natural-transformation ^>= 0.4
+                     , exceptions ^>= 0.10
+                     , dhall ^>= 1.19
+                     , data-default-class >= 0.1
+                     , req ^>= 2.0
+                     , http-client >= 0.5 && < 0.7
+                     , http-api-data ^>=0.4
+                     , unliftio-core ^>= 0.1
+                     , http-types >= 0.8 && < 10.0
+                     , aeson ^>= 1.4
+                     , lens-aeson ^>= 1.0
+                     , aeson-pretty ^>= 0.8
+                     , memory ^>= 0.14
+                     , cryptonite ^>= 0.25
+                     , sum-type-boilerplate ^>=0.1
+                     , persistent ^>= 2.9
+                     , persistent-postgresql ^>= 2.9
+                     , eventful-core
+                     , eventful-memory
+                     , eventful-postgresql
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
+
+common exe
+  import:              main
+  ghc-options:         -Wall
+                       -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+                       -fhide-source-paths
+                       -Wmissing-export-lists
+                       -Wpartial-fields
+  build-depends:       trader
+                     , dotenv
+                     , optparse-applicative ^>= 0.14
+                     , directory ^>= 1.3
+
+library
+  import:              main
+  ghc-options:         -Wall
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+                       -fhide-source-paths
+                       -Wmissing-export-lists
+                       -Wpartial-fields
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
+  exposed-modules:     Trader
+                     , Trader.App
+                     , Trader.Loop
+                     , Trader.Env
+                     , Trader.Data
+                     , Trader.Config
+                     , Trader.Settings
+                     , Trader.Exception
+                     , Trader.Util.JSON
+                     , Trader.API
+                     , Trader.API.Auth
+                     , Trader.API.Auth.Key
+                     , Trader.API.Endpoint.Filter
+                     , Trader.API.Endpoint.Order
+                     , Trader.API.Endpoint.Order.Placement
+                     , Trader.API.Endpoint.QuoteL1
+                     , Trader.API.Endpoint.QuoteL2
+                     , Trader.API.Request
+                     , Trader.API.Request.Signature
+                     , Trader.API.Request.Expiration
+                     , Trader.Data.Currency
+                     , Trader.Data.Instrument
+                     , Trader.Data.Instrument.Symbol
+                     , Trader.Data.Instrument.Symbol.RootSymbol
+                     , Trader.Data.Instrument.Symbol.InstrumentSymbol
+                     , Trader.Data.Instrument.InstrumentState
+                     , Trader.Data.Instrument.TickDirection
+                     , Trader.Data.Instrument.FairMethod
+                     , Trader.Data.Instrument.MarkMethod
+                     , Trader.Data.Order
+                     , Trader.Data.Order.Side
+                     , Trader.Data.Order.OrderType
+                     , Trader.Data.Order.OrderStatus
+                     , Trader.Data.Order.TimeInForce
+                     , Trader.Data.Order.ExecutionInstruction
+                     , Trader.Data.Order.PegPriceType
+                     , Trader.Data.Account
+                     , Trader.Data.PriceLevel
+                     , Trader.Data.Touchline
+                     , Trader.Data.QuoteL1
+                     , Trader.Data.QuoteL2
+                     , Trader.Data.Network
+                     , Network.HTTP.Req.Extra
+                     , Data.Time.Format.Extra
+                     , Control.Monad.Throw.Extra
+                     , Sandbox.CQRS.EventStore
+                     , Sandbox.Aeson1
+                     , Sandbox.Crypto1
+                     , Sandbox.SumType1
+                     , Sandbox.Eventful1
+                     , Sandbox.Eventful2
+                     , Sandbox.Eventful3
+                     , Sandbox.Req1
+                     , Sandbox.Req2
+                     , Sandbox.Req3
+                     , Sandbox.Records1
+                     , Sandbox.Records.Foo
+                     , Sandbox.Records.Bar
+  hs-source-dirs:      src
+
+executable counter
+  import:              exe
+  hs-source-dirs:      counter
+  build-depends:       trader
+                     , template-haskell ^>= 2.14
+                     , monad-logger ^>= 0.3
+  main-is:             Main.hs
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
+  other-modules:       Counter.Model
+                     , Counter.Projection
+                     , Counter.Aggregate
+                     , Counter.Command
+                     , Counter.CLI
+                     , Counter.CLI.Command
+                     , Counter.CLI.Options
+                     , Counter.CLI.Run
+                     , Counter.CLI.Store
+                     , Counter.Event
+
+executable bank
+  import:              exe
+  hs-source-dirs:      bank
+  build-depends:       trader
+                     , template-haskell ^>= 2.14
+  main-is:             Main.hs
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
+  other-modules:       Bank.Model.Customer.Event
+                     , Bank.Model.Customer.Event.Created
+                     , Bank.Model.Customer.Event.CreationRejected
+                     , Bank.Model.Customer.Command
+                     , Bank.Model.Customer.Command.Create
+                     , Bank.Model.Customer.Projection
+                     , Bank.Model.Customer.Aggregate
+                     , Bank.Model.Customer
+                     , Bank.Model.Account.Event
+                     , Bank.Model.Account.Event.Opened
+                     , Bank.Model.Account.Event.OpenRejected
+                     , Bank.Model.Account.Event.Credited
+                     , Bank.Model.Account.Event.Debited
+                     , Bank.Model.Account.Event.DebitRejected
+                     , Bank.Model.Account.Event.TransferStarted
+                     , Bank.Model.Account.Event.TransferCompleted
+                     , Bank.Model.Account.Event.TransferRejected
+                     , Bank.Model.Account.Event.CreditedFromTransfer
+                     , Bank.Model.Account.Command
+                     , Bank.Model.Account.Command.Open
+                     , Bank.Model.Account.Command.Credit
+                     , Bank.Model.Account.Command.Debit
+                     , Bank.Model.Account.Command.Transfer
+                     , Bank.Model.Account.Command.Accept
+                     , Bank.Model.Account.Data.PendingTransfer
+                     , Bank.Model.Account.Projection
+
+executable trader-server
+  import:              exe
+  hs-source-dirs:      server
+  main-is:             Main.hs
+  other-modules:       CLI
+                     , Dotenv
+
+executable trader-client
+  import:              exe
+  hs-source-dirs:      client
+  main-is:             Main.hs
+
+test-suite trader-test
+  import:              main
+  ghc-options:         -Wall
+                       -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+                       -fhide-source-paths
+                       -Wmissing-export-lists
+                       -Wpartial-fields
+                       -Wmissing-home-modules
+                       -- delegate to tasty to discover tests
+                       -fno-warn-missing-export-lists
+  type:                exitcode-stdio-1.0
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
+  build-depends:       trader
+                     , tasty ^>= 1.2
+                     , tasty-expected-failure ^>= 0.11
+                     , hedgehog ^>= 0.6
+                     , tasty-hedgehog ^>= 0.2
+                     , eventful-test-helpers ^>= 0.2
+                     , doctest ^>= 0.16
+  build-tool-depends:  tasty-discover:tasty-discover == 4.*
+  other-modules:       Sandbox.Test1
+                     , Trader.API.Request.SignatureTest
+  hs-source-dirs:      test
+  main-is:             Driver.hs

@@ -1,0 +1,7 @@
+dist/
+dist-newstyle/
+.ghc.environment.*
+logs/
+.env.mainnet
+.env.testnet
+result
