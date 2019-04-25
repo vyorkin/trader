@@ -14,7 +14,7 @@ import Text.Show (Show, show)
 import Trader.Data.Instrument.Symbol.InstrumentSymbol (InstrumentSymbol (..),
                                                        currency,
                                                        mkInstrumentSymbol,
-                                                       rootSymbol)
+                                                       root)
 import Trader.Data.Instrument.Symbol.RootSymbol (RootSymbol (..))
 
 data Symbol

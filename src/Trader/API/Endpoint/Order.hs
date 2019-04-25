@@ -5,8 +5,8 @@ module Trader.API.Endpoint.Order
   , listNew
   , place
   , placeBulk
-  -- , amend
-  -- , amendBulk
+  , amend
+  , amendBulk
   , cancel
   , cancelAll
   , module Trader.API.Endpoint.Order.Placement
@@ -35,11 +35,11 @@ place o = request POST (/: "order") mempty (ReqBodyJson o)
 placeBulk :: MonadApp m => [Placement] -> m [Order]
 placeBulk os = request POST (\u -> u /: "order" /: "bulk") mempty (ReqBodyJson os)
 
--- amend :: MonadApp m => Order -> m ()
--- amend o = request PUT (/: "order") mempty (ReqBodyJson o)
+amend :: MonadApp m => Order -> m ()
+amend o = request PUT (/: "order") mempty (ReqBodyJson o)
 
--- amendBulk :: MonadApp m => [Order] -> m ()
--- amendBulk os = request PUT (\u -> u /: "order" /: "bulk") mempty (ReqBodyJson os)
+amendBulk :: MonadApp m => [Order] -> m ()
+amendBulk os = request PUT (\u -> u /: "order" /: "bulk") mempty (ReqBodyJson os)
 
 cancel :: MonadApp m => [OrderId] -> m ()
 cancel ids = request DELETE (/: "order") mempty NoReqBody

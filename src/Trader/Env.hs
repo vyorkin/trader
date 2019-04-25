@@ -10,7 +10,9 @@ module Trader.Env
   , config
   , network
   , logger
-  , priceLevel
+  , instrumentSymbol
+  , rootSymbol
+  , touchline
   , orders
   , newEnv
   ) where
@@ -19,12 +21,17 @@ import Colog (HasLog, LogAction, Message, cmapM, defaultFieldMap,
               fmtRichMessageDefault, getLogAction, liftLogIO, logTextStdout,
               setLogAction, upgradeMessageAction)
 import Control.Concurrent (MVar)
-import Control.Lens (makeLenses)
+import Control.Lens (makeLenses, (^.))
 
-import Trader.Config (Config)
+import Control.Monad.Throw.Extra (maybeThrow)
+import Trader.Config (Config, settings)
+import Trader.Data.Instrument.Symbol (InstrumentSymbol (..), RootSymbol (..))
+import qualified Trader.Data.Instrument.Symbol.InstrumentSymbol as InstrumentSymbol
 import Trader.Data.Network (Network)
-import Trader.Data.Order (Order, OrderId)
-import Trader.Data.PriceLevel (PriceLevel)
+import Trader.Data.Order (OrderMap)
+import Trader.Data.Touchline (Touchline)
+import Trader.Exception (SettingsException (..))
+import Trader.Settings (Settings (..))
 
 -- | Global environment stores read-only information and
 -- mutable refs to global state available to any
@@ -36,10 +43,14 @@ data Env m = Env
   , _network :: !Network
     -- | A `LogAction` to be used by the `co-log` package.
   , _logger :: !(LogAction m Message)
+    -- | Instrument symbol.
+  , _instrumentSymbol :: !InstrumentSymbol
+    -- | Root symbol.
+  , _rootSymbol :: !RootSymbol
     -- | Level-2 market quotes.
-  , _priceLevel :: !(MVar PriceLevel)
+  , _touchline :: !(MVar Touchline)
     -- | Current (pending) orders.
-  , _orders :: !(MVar (Map OrderId Order))
+  , _orders :: !(MVar OrderMap)
   }
 
 makeLenses ''Env
@@ -65,6 +76,15 @@ newEnv _config _network logTextFile = do
     logRich = cmapM fmtRichMessageDefault logText
     logFull = upgradeMessageAction defaultFieldMap logRich
     _logger = liftLogIO logFull
-  _priceLevel <- newEmptyMVar
+  (_instrumentSymbol, _rootSymbol) <- readSymbols _config
+  _touchline <- newEmptyMVar
   _orders <- newEmptyMVar
   return Env{..}
+
+readSymbols :: Config -> IO (InstrumentSymbol, RootSymbol)
+readSymbols cfg = do
+  let Settings{..} = cfg ^. settings
+  maybeThrow (InvalidInstrumentException instrument) $ do
+    inst <- readMaybe instrument
+    root <- InstrumentSymbol.root inst
+    return (inst, root)

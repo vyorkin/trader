@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase       #-}
 {-# LANGUAGE PatternSynonyms  #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE RecordWildCards  #-}
 
 module Main
   ( main
@@ -10,13 +11,17 @@ module Main
   , server
   ) where
 
-import Prelude hiding (log)
+import Prelude hiding (init)
 import Colog (pattern I, withLogTextFile, log)
 import Options.Applicative (execParser)
 import System.Directory (createDirectoryIfMissing)
 
-import Trader (runApp, MonadApp)
-import Trader.Env (newEnv)
+import Control.Concurrent.Timer (repeatedTimer)
+import Control.Concurrent.Suspend (sDelay)
+import Control.Monad.IO.Unlift (withRunInIO)
+
+import Trader (runApp, MonadApp, init)
+import Trader.Env (newEnv, touchline, rootSymbol, orders)
 import Trader.Data (Network)
 import qualified Trader.Loop as Loop
 import qualified Trader.Data.Network as Network (toName)
@@ -49,5 +54,7 @@ start cfg net = do
 server :: MonadApp m => m ()
 server = do
   log I "start"
-  Loop.run
+  init
+  void $ withRunInIO $ \io ->
+    repeatedTimer (io Loop.run) (sDelay 30)
   log I "stop"

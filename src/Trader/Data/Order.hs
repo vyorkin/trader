@@ -126,10 +126,10 @@ instance FromJSON Order where
 instance ToJSON Order
 
 instance ToText Order where
-  toText Order{..} = unlines
-    [ show side <> " " <> maybe "" show price <> " " <> show orderType <> " (" <> show status <> ") "
-    , "[" <> show orderId <> " / " <> show accountId <> "] " <> maybe "" show timestamp
-    ]
+  toText Order{..} = show side
+    <> " " <> show symbol
+    <> " " <> maybe "" show price <> " "
+    <> show orderType <> " (" <> show status <> ") "
 
 isNew :: Order -> Bool
 isNew Order{..} = status == New

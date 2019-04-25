@@ -1,5 +1,5 @@
 { instrument = "XBTUSD"
-, orderPairs = 10
+, orderPairs = 5
 , orderSize = 10
-, interval = 50.0
+, interval = 0.002
 }

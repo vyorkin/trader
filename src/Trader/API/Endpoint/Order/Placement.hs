@@ -70,6 +70,12 @@ instance ToJSON Placement where
     , "text" .= annotation
     ]
 
+instance ToText Placement where
+  toText Placement{..} = show side
+    <> " " <> show symbol
+    <> " " <> maybe "" show price <> " "
+    <> show orderType
+
 -- | Creates a limit-order placement parameters.
 mkLimit :: Side -> InstrumentSymbol -> Double -> Int -> Placement
 mkLimit side symbol price orderQty =

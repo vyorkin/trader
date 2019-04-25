@@ -16,7 +16,7 @@ module Trader.Config
 
 import Control.Lens (makeLenses)
 import qualified Data.ByteString.Char8 as Char8 (pack)
-import Database.Persist.Postgresql (ConnectionString (..))
+import Database.Persist.Postgresql (ConnectionString)
 import qualified Dhall
 import System.Environment (lookupEnv)
 
@@ -25,7 +25,7 @@ import qualified Trader.API.Auth.Key as APIKey (load)
 
 import Trader.Data.Network (Network)
 import qualified Trader.Data.Network as Network
-import Trader.Settings (Settings)
+import Trader.Settings (Settings(..))
 
 -- | Application config.
 data Config = Config
@@ -47,13 +47,16 @@ load net = do
   _dbName <- "DB_NAME" `withDef` ("trader-" <> Network.toName net)
   _dbUser <- lookupEnv "DB_USER"
   _dbPassword <- lookupEnv "DB_PASSWORD"
-  _settings <- Dhall.input Dhall.auto "./settings.dhall"
+  _settings@Settings{..} <- Dhall.input Dhall.auto "./settings.dhall"
   runMaybeT $ do
     _dbPort <- "DB_PORT" `readDef` 5432
     _apiKey <- MaybeT APIKey.load
     return Config {..}
   where
+    withDef :: MonadIO m => String -> String -> m String
     withDef k v = liftIO $ fromMaybe v <$> lookupEnv k
+
+    readDef :: Read a => String -> a -> MaybeT IO a
     readDef k v = MaybeT $ maybe (pure v) readMaybe <$> lookupEnv k
 
 mkConnectionString :: Config -> ConnectionString

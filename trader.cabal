@@ -27,6 +27,8 @@ common main
                      , stm ^>= 2.5
                      , natural-transformation ^>= 0.4
                      , exceptions ^>= 0.10
+                     , suspend ^>= 0.2
+                     , timers ^>= 0.2
                      , dhall ^>= 1.19
                      , data-default-class >= 0.1
                      , req ^>= 2.0
@@ -89,6 +91,11 @@ library
                      , Trader.Settings
                      , Trader.Exception
                      , Trader.Util.JSON
+                     , Trader.Capability
+                     , Trader.Capability.Http
+                     , Trader.Capability.Resource
+                     , Trader.Capability.Resource.Order
+                     , Trader.Capability.Resource.QuoteL2
                      , Trader.API
                      , Trader.API.Auth
                      , Trader.API.Auth.Key
@@ -197,6 +204,8 @@ executable bank
 
 executable trader-server
   import:              exe
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
   hs-source-dirs:      server
   main-is:             Main.hs
   other-modules:       CLI
@@ -204,6 +213,8 @@ executable trader-server
 
 executable trader-client
   import:              exe
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude, Relude.Unsafe)
   hs-source-dirs:      client
   main-is:             Main.hs
 

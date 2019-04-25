@@ -13,29 +13,31 @@ module Trader.API.Request
 
 import Prelude hiding (exp, filter, get, put)
 
-import Colog (pattern D, log)
+import Colog (WithLog, Message, pattern D, log)
 import Control.Lens (view, (^.))
-import Control.Monad.IO.Unlift (withRunInIO)
+import Control.Monad.IO.Unlift (MonadUnliftIO, withRunInIO)
 import Data.Aeson (FromJSON)
 import Network.HTTP.Client (Request, RequestBody (..))
 import qualified Network.HTTP.Client as Request
-import Network.HTTP.Req (AllowsBody, HttpBody, HttpBodyAllowed, HttpMethod,
+import Network.HTTP.Req (MonadHttp, AllowsBody, HttpBody, HttpBodyAllowed, HttpMethod,
                          ProvidesBody, Scheme (..), Url, customAuth,
                          getRequestBody, httpMethodName, jsonResponse, req,
                          responseBody, (/:))
 import qualified Network.HTTP.Req as Req
 
+import Trader.Env (Env)
 import Trader.API.Auth (Auth (..))
 import qualified Trader.API.Auth as Auth
 import Trader.API.Request.Expiration (Expiration, newExpiration)
 import Trader.API.Request.Signature (Signature, mkSignature)
-import Trader.App (MonadApp)
 import Trader.Config (apiKey)
 import qualified Trader.Data.Network as Network
 import Trader.Env (config, network)
 
 request
-  :: ( MonadApp m
+  :: ( WithLog (Env z) Message m
+     , MonadUnliftIO m
+     , MonadHttp m
      , HttpMethod method
      , FromJSON a
      , HttpBody body
@@ -62,12 +64,12 @@ getBody body = case getRequestBody body of
   _                -> ""
 
 authenticate
-  :: MonadApp m
-  => ByteString
-  -> Request
-  -> m Request
+  :: ( MonadIO m
+     , WithLog (Env z) Message m
+     )
+  => ByteString -> Request -> m Request
 authenticate body r = do
-  cfg <- asks (view config)
+  cfg <- view config
   exp <- liftIO $ newExpiration
   let
     key  = cfg ^. apiKey
@@ -78,9 +80,8 @@ authenticate body r = do
   return $ Auth.claim auth r
 
 withUrl
-  :: MonadApp m
-  => (Url 'Https -> Url 'Https)
-  -> m (Url 'Https)
+  :: MonadReader (Env z) m
+  => (Url 'Https -> Url 'Https) -> m (Url 'Https)
 withUrl f = do
-  url <- Network.toUrl <$> asks (view network)
+  url <- Network.toUrl <$> view network
   return $ f (url /: "api" /: "v1")

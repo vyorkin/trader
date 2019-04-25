@@ -11,14 +11,14 @@ module Trader.API.Endpoint.Filter
 import Prelude hiding (reverse)
 
 import Data.Aeson (encode)
+import qualified Data.ByteString.Lazy.Char8 as LazyChar8
 import Data.Default.Class (Default)
 import qualified Data.Text as Text
 import Data.Time.Clock (UTCTime)
 import Data.Time.Format.Extra (iso8601)
 import Network.HTTP.Req ((=:))
-import Web.HttpApiData (ToHttpApiData)
 import qualified Network.HTTP.Req as Req
-import qualified Data.ByteString.Lazy.Char8 as LazyChar8
+import Web.HttpApiData (ToHttpApiData)
 
 import Trader.Data.Instrument (Symbol)
 

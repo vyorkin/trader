@@ -4,7 +4,7 @@
 module Trader.Data.Instrument.Symbol.InstrumentSymbol
   ( InstrumentSymbol(..)
   , mkInstrumentSymbol
-  , rootSymbol
+  , root
   , currency
   ) where
 
@@ -40,8 +40,8 @@ mkInstrumentSymbol XBT USD = Just XBTUSD
 mkInstrumentSymbol ETH USD = Just ETHUSD
 mkInstrumentSymbol _ _     = Nothing
 
-rootSymbol :: InstrumentSymbol -> Maybe RootSymbol
-rootSymbol = \case
+root :: InstrumentSymbol -> Maybe RootSymbol
+root = \case
   XBTUSD -> Just XBT
   ETHUSD -> Just ETH
   _      -> Nothing
