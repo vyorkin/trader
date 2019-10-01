@@ -5,3 +5,4 @@ logs/
 .env.mainnet
 .env.testnet
 result
+.liquid

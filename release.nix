@@ -5,6 +5,9 @@ let
         overrides = haskellPackagesNew: haskellPackagesOld: rec {
           project = haskellPackagesNew.callPackage ./project.nix { };
 
+          co-log = haskellPackagesNew.callPackage ./nix/co-log.nix { };
+          typerep-map = haskellPackagesNew.callPackage ./nix/typerep-map.nix { };
+
           req = haskellPackagesNew.callPackage ./nix/req.nix { };
           retry = haskellPackagesNew.callPackage ./nix/retry.nix { };
           dotenv = haskellPackagesNew.callPackage ./nix/dotenv.nix { };

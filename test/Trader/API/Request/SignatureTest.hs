@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+
 module Trader.API.Request.SignatureTest where
 
 import Prelude hiding (exp)

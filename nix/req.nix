@@ -1,19 +1,13 @@
 { mkDerivation, aeson, authenticate-oauth, base, blaze-builder
-, bytestring, case-insensitive, connection, fetchgit, hspec
-, hspec-core, hspec-discover, http-api-data, http-client
-, http-client-tls, http-types, monad-control, mtl, QuickCheck
-, retry, stdenv, text, time, transformers, transformers-base
-, unordered-containers
+, bytestring, case-insensitive, connection, hspec, hspec-core
+, hspec-discover, http-api-data, http-client, http-client-tls
+, http-types, monad-control, mtl, QuickCheck, retry, stdenv, text
+, time, transformers, transformers-base, unordered-containers
 }:
 mkDerivation {
   pname = "req";
-  version = "2.0.1";
-  src = fetchgit {
-    url = "https://github.com/mrkkrp/req.git";
-    sha256 = "0yxsl6gl1is69x5gyv8129zzlipsk33jgj39k01sv7ma3yw2ix33";
-    rev = "4df31fc7178b5a04fff02c9deaeda9d35739d677";
-    fetchSubmodules = true;
-  };
+  version = "2.1.0";
+  sha256 = "d6946db9e02f3080dfe55c713fe1ae815bc014a1da630eb73b18f3b90622551f";
   enableSeparateDataOutput = true;
   libraryHaskellDepends = [
     aeson authenticate-oauth base blaze-builder bytestring
