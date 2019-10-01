@@ -167,41 +167,6 @@ executable counter
                      , Counter.CLI.Store
                      , Counter.Event
 
-executable bank
-  import:              exe
-  hs-source-dirs:      bank
-  build-depends:       trader
-                     , template-haskell ^>= 2.14
-  main-is:             Main.hs
-  mixins:              base hiding (Prelude)
-                     , relude (Relude as Prelude, Relude.Unsafe)
-  other-modules:       Bank.Model.Customer.Event
-                     , Bank.Model.Customer.Event.Created
-                     , Bank.Model.Customer.Event.CreationRejected
-                     , Bank.Model.Customer.Command
-                     , Bank.Model.Customer.Command.Create
-                     , Bank.Model.Customer.Projection
-                     , Bank.Model.Customer.Aggregate
-                     , Bank.Model.Customer
-                     , Bank.Model.Account.Event
-                     , Bank.Model.Account.Event.Opened
-                     , Bank.Model.Account.Event.OpenRejected
-                     , Bank.Model.Account.Event.Credited
-                     , Bank.Model.Account.Event.Debited
-                     , Bank.Model.Account.Event.DebitRejected
-                     , Bank.Model.Account.Event.TransferStarted
-                     , Bank.Model.Account.Event.TransferCompleted
-                     , Bank.Model.Account.Event.TransferRejected
-                     , Bank.Model.Account.Event.CreditedFromTransfer
-                     , Bank.Model.Account.Command
-                     , Bank.Model.Account.Command.Open
-                     , Bank.Model.Account.Command.Credit
-                     , Bank.Model.Account.Command.Debit
-                     , Bank.Model.Account.Command.Transfer
-                     , Bank.Model.Account.Command.Accept
-                     , Bank.Model.Account.Data.PendingTransfer
-                     , Bank.Model.Account.Projection
-
 executable trader-server
   import:              exe
   mixins:              base hiding (Prelude)
