@@ -21,7 +21,6 @@ mkDerivation {
   ];
   executableToolDepends = [ markdown-unlit ];
   testHaskellDepends = [ base co-log-core hedgehog ];
-  doCheck = false;
   homepage = "https://github.com/kowainik/co-log";
   description = "Composable Contravariant Comonadic Logging Library";
   license = stdenv.lib.licenses.mpl20;

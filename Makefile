@@ -11,6 +11,6 @@ clean:
 		rm -f .ghc.environment*
 		nix-shell --run 'cabal clean'
 c2n:
-		cabal2nix . > project.nix
+		cabal2nix . > ./nix/project.nix
 
 .PHONY: build repl test clean c2n

@@ -1,21 +1,52 @@
+{ compiler ? "ghc865" }:
+
 let
+  overrides = {
+    dontCheck = ["co-log"];
+    doJailbreak = [];
+    dontHaddock = [];
+    dontCoverage = [];
+    dontBenchmark = [];
+  };
+
+  generatedOverrides = haskellPackages: haskellPackagesOld:
+  let
+    toPackage = file: _: {
+      name = builtins.replaceStrings [".nix"] [""] file;
+      value = haskellPackages.callPackage (./. + "/nix/${file}") { };
+    };
+  in pkgs.lib.mapAttrs' toPackage (builtins.readDir ./nix);
+
+  makeOverrides = function: names: haskellPackages: haskellPackagesOld:
+  let
+    toPackage = name: {
+      inherit name;
+      value = function haskellPackagesOld.${name};
+    };
+  in builtins.listToAttrs (map toPackage names);
+
+  composeExtensionsList = pkgs.lib.fold pkgs.lib.composeExtensions (_: _: { });
+
+  # More exotic overrides go here
+  manualOverrides = haskellPackagesNew: haskellPackagesOld: { };
+
   config = {
     packageOverrides = pkgs: rec {
-      haskellPackages = pkgs.haskellPackages.override {
-        overrides = haskellPackagesNew: haskellPackagesOld: rec {
-          project = haskellPackagesNew.callPackage ./project.nix { };
-
-          co-log = haskellPackagesNew.callPackage ./nix/co-log.nix { };
-          typerep-map = haskellPackagesNew.callPackage ./nix/typerep-map.nix { };
-
-          req = haskellPackagesNew.callPackage ./nix/req.nix { };
-          retry = haskellPackagesNew.callPackage ./nix/retry.nix { };
-          dotenv = haskellPackagesNew.callPackage ./nix/dotenv.nix { };
-
-          eventful-core = haskellPackagesNew.callPackage ./nix/eventful-core.nix { };
-          eventful-memory = haskellPackagesNew.callPackage ./nix/eventful-memory.nix { };
-          eventful-postgresql = haskellPackagesNew.callPackage ./nix/eventful-postgresql.nix { };
-          eventful-test-helpers = haskellPackagesNew.callPackage ./nix/eventful-test-helpers.nix { };
+      haskell = pkgs.haskell // {
+        packages = pkgs.haskell.packages // {
+          "${compiler}" = pkgs.haskell.packages."${compiler}".override {
+            overrides = composeExtensionsList [
+              generatedOverrides
+              (makeOverrides pkgs.haskell.lib.dontCheck overrides.dontCheck)
+              (makeOverrides pkgs.haskell.lib.doJailbreak overrides.doJailbreak)
+              (makeOverrides pkgs.haskell.lib.dontHaddock overrides.dontHaddock)
+              (makeOverrides pkgs.haskell.lib.dontHaddock
+              overrides.dontCoverage)
+              (makeOverrides pkgs.haskell.lib.dontHaddock
+              overrides.dontBenchmark)
+              manualOverrides
+            ];
+          };
         };
       };
     };
@@ -23,6 +54,4 @@ let
 
   pkgs = import <nixpkgs> { inherit config; };
 
-in
-  { project = pkgs.haskellPackages.project;
-  }
+in { project = pkgs.haskell.packages."${compiler}".project; }
